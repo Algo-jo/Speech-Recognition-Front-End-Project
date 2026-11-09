@@ -1,0 +1,6 @@
+{
+  "name": "PronounceAI - Accent & Pronunciation Coach",
+  "description": "Single-page English pronunciation practice with live recording, real-time transcript, word-by-word analysis, and phoneme feedback.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
