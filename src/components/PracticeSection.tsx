@@ -42,38 +42,27 @@ export const PracticeSection: React.FC<PracticeSectionProps> = ({
     transcript.trim().length > 0;
 
   return (
-    <div className="max-w-4xl mx-auto py-6 sm:py-8">
-      {/* Target Sentence Area */}
-      <div className="text-center mb-8">
-        <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider block mb-2">
-          Target Sentence
-        </span>
+    <div className="max-w-5xl w-full mx-auto py-5 sm:py-8 flex flex-col items-center gap-6 sm:gap-8">
+      {/* 1. Target Sentence (Tengah Atas - Tanpa Box, Tanpa Label, Tanpa Tanda Petik, Ukuran Besar) */}
+      <div className="w-full text-center flex items-center justify-center gap-3 sm:gap-4 px-4">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+          {sentence.text}
+        </h1>
 
-        <div className="flex items-center justify-center gap-3">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 tracking-tight text-balance leading-snug">
-            &ldquo;{sentence.text}&rdquo;
-          </h1>
-          <button
-            type="button"
-            onClick={handlePlayModel}
-            className="p-2 text-neutral-400 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors shadow-2xs shrink-0"
-            title="Listen to native audio"
-          >
-            <Volume2 className={`w-5 h-5 ${isPlayingModel ? 'text-indigo-600 animate-pulse' : ''}`} />
-          </button>
-        </div>
-
-        <p className="mt-2 text-sm text-neutral-500 font-mono">
-          {sentence.ipa}
-        </p>
-
-        <p className="mt-2 text-xs sm:text-sm text-neutral-500">
-          Read the sentence aloud clearly into your microphone.
-        </p>
+        {/* Speaker Audio Button */}
+        <button
+          type="button"
+          onClick={handlePlayModel}
+          className="p-2.5 sm:p-3 bg-[#18272e] hover:bg-[#202f36] border-2 border-[#37464f] text-[#ffc800] rounded-2xl transition-all shadow-md cursor-pointer shrink-0 active:scale-95"
+          title="Listen to native model audio"
+          aria-label="Listen audio"
+        >
+          <Volume2 className={`w-5 h-5 sm:w-6 sm:h-6 ${isPlayingModel ? 'animate-bounce' : ''}`} />
+        </button>
       </div>
 
-      {/* Two Columns: Left Voice Recording + Right Live Speech Transcript */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+      {/* 2. Tombol Mikrofon di Tengah dengan Gelombang Suara Terlentang di Kiri dan Kanan */}
+      <div className="w-full">
         <RecordingPanel
           recordingState={recordingState}
           onStartRecording={onStartRecording}
@@ -82,34 +71,37 @@ export const PracticeSection: React.FC<PracticeSectionProps> = ({
           audioBlobUrl={audioBlobUrl}
           recordedDuration={recordedDuration}
         />
+      </div>
 
+      {/* 3. Live Speech Transcript (Langsung di Bawah Fitur Mic Tanpa Box) */}
+      <div className="w-full">
         <LiveTranscript
           transcript={transcript}
           recordingState={recordingState}
         />
       </div>
 
-      {/* Tombol Analyze Pronunciation di bawahnya */}
-      <div className="flex justify-center">
+      {/* 4. Tombol Analyze Pronunciation (Diperpanjang agar teks tidak bertumpuk) */}
+      <div className="w-full flex justify-center pt-2">
         <button
           type="button"
           onClick={onAnalyze}
           disabled={!isReadyToAnalyze || recordingState === 'analyzing'}
-          className={`inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm sm:text-base font-semibold rounded-xl transition-all shadow-sm ${
+          className={`min-w-[280px] sm:min-w-[340px] px-8 sm:px-10 py-4 sm:py-4.5 rounded-2xl text-sm sm:text-base font-black uppercase tracking-wider flex items-center justify-center gap-3 text-center transition-all shadow-2xl whitespace-nowrap ${
             isReadyToAnalyze && recordingState !== 'analyzing'
-              ? 'bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white cursor-pointer shadow-indigo-200'
-              : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+              ? 'bg-[#ffc800] hover:bg-[#e5b400] text-[#131f24] border-b-6 border-[#cc9f00] active:translate-y-1.5 active:border-b-2 cursor-pointer'
+              : 'bg-[#2b3a42] text-[#6f828e] border-b-4 border-[#1f2b31] cursor-not-allowed opacity-60'
           }`}
         >
           {recordingState === 'analyzing' ? (
             <>
-              <Loader2 className="w-5 h-5 animate-spin text-white" />
-              <span>Analyzing Pronunciation...</span>
+              <Loader2 className="w-5 h-5 animate-spin text-[#131f24] shrink-0" />
+              <span>Analyzing Speech...</span>
             </>
           ) : (
             <>
               <span>Analyze Pronunciation</span>
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5 shrink-0" />
             </>
           )}
         </button>

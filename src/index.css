@@ -4,26 +4,25 @@
   --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Linear-inspired refined focus and scrollbars */
 *:focus-visible {
-  outline: 2px solid #6366f1;
+  outline: 2px solid #ffc800;
   outline-offset: 2px;
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #131f24;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
+  background: #2b3a42;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
+  background: #37464f;
 }

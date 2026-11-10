@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Volume2, CheckCircle2, AlertCircle, XCircle, RotateCcw, Sparkles } from 'lucide-react';
+import { Volume2, RotateCcw, Sparkles } from 'lucide-react';
 import { PracticeSentence, WordAnalysis as WordAnalysisType } from '../types';
-import { speakText, playPhonemeSound } from '../utils/audio';
+import { speakText } from '../utils/audio';
 
 interface ResultSectionProps {
   sentence: PracticeSentence;
-  onBackToHome: () => void;
   onPracticeAgain: () => void;
 }
 
 export const ResultSection: React.FC<ResultSectionProps> = ({
   sentence,
-  onBackToHome,
   onPracticeAgain,
 }) => {
-  // Focus on the word needing attention (e.g. 'is' in default sentence), or first word
   const defaultWord =
     sentence.words.find((w) => w.status !== 'correct') || sentence.words[0];
   const [selectedWord, setSelectedWord] = useState<WordAnalysisType>(defaultWord);
@@ -29,276 +26,212 @@ export const ResultSection: React.FC<ResultSectionProps> = ({
     speakText(wordText, 0.75);
   };
 
-  const handlePlayPhoneme = (symbol: string, isVoiced: boolean) => {
-    playPhonemeSound(symbol, isVoiced);
-  };
-
   const getScoreRating = (s: number) => {
-    if (s >= 90) return { label: 'Excellent', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
-    if (s >= 80) return { label: 'Good', color: 'text-indigo-700 bg-indigo-50 border-indigo-200' };
-    if (s >= 70) return { label: 'Partially Accurate', color: 'text-amber-700 bg-amber-50 border-amber-200' };
-    return { label: 'Needs Practice', color: 'text-rose-700 bg-rose-50 border-rose-200' };
+    if (s >= 90) return { label: 'Excellent', color: 'text-[#58cc02] bg-[#58cc02]/15 border-[#58cc02]/30' };
+    if (s >= 80) return { label: 'Good', color: 'text-[#ffc800] bg-[#ffc800]/15 border-[#ffc800]/30' };
+    return { label: 'Need Improvement', color: 'text-[#ff4b4b] bg-[#ff4b4b]/15 border-[#ff4b4b]/30' };
   };
 
   const rating = getScoreRating(sentence.overallScore);
 
   return (
-    <div className="max-w-4xl mx-auto py-6 sm:py-8 space-y-6">
-      {/* Tombol BACK buat kembali ke HOME */}
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={onBackToHome}
-          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-neutral-700 hover:text-neutral-900 bg-white hover:bg-neutral-50 border border-neutral-200/90 rounded-xl transition-colors shadow-2xs cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4 text-neutral-600" />
-          <span>Back to Home</span>
-        </button>
+    <div className="max-w-5xl w-full mx-auto py-3 sm:py-5 flex flex-col justify-center">
+      {/* 2-Column Grid: Kiri Target Sentence + Overall Score; Kanan Word Breakdown + Phonemes + Practice Again */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        {/* KOLOM KIRI: Target Sentence & Overall Score (Simple) */}
+        <div className="lg:col-span-5 flex flex-col justify-start gap-4">
+          {/* 1. Target Sentence Box */}
+          <div className="bg-[#202f36] rounded-3xl border-2 border-[#2b3a42] p-5 sm:p-6 shadow-md">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <span className="text-xs font-extrabold text-[#afbbcf] uppercase tracking-wider block mb-1">
+                  Target Sentence
+                </span>
+                <h2 className="text-xl sm:text-2xl font-black text-white leading-snug">
+                  &ldquo;{sentence.text}&rdquo;
+                </h2>
+              </div>
 
-        <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
-          Pronunciation Assessment
-        </span>
-      </div>
-
-      {/* Target Sentence Header */}
-      <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5 sm:p-6 flex items-center justify-between gap-4">
-        <div>
-          <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1">
-            Sentence
-          </span>
-          <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
-            &ldquo;{sentence.text}&rdquo;
-          </h2>
-          <span className="text-xs font-mono text-neutral-500 mt-0.5 block">
-            {sentence.ipa}
-          </span>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => handlePlayWord(sentence.text)}
-          className="p-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl transition-colors shrink-0"
-          title="Listen sentence"
-        >
-          <Volume2 className="w-4 h-4 text-indigo-600" />
-        </button>
-      </div>
-
-      {/* Simplified Overall Score & AI Feedback */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Score Box */}
-        <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
-                Overall Score
-              </span>
-              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${rating.color}`}>
-                {rating.label}
-              </span>
-            </div>
-
-            <div className="flex items-baseline gap-2 my-2">
-              <span className="text-4xl font-extrabold text-neutral-900 tabular-nums">
-                {sentence.overallScore}
-              </span>
-              <span className="text-sm font-medium text-neutral-400">/ 100</span>
-            </div>
-          </div>
-
-          <div className="pt-3 border-t border-neutral-100 flex items-center justify-between text-xs text-neutral-600">
-            <span className="font-medium text-emerald-700">{sentence.correctCount} Correct</span>
-            <span className="font-medium text-rose-700">{sentence.incorrectCount} Incorrect</span>
-          </div>
-        </div>
-
-        {/* AI Feedback Box */}
-        <div className="md:col-span-2 bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-              <span>AI Pronunciation Feedback</span>
-            </div>
-            <p className="text-sm text-neutral-800 leading-relaxed font-normal">
-              {sentence.aiSummary}
-            </p>
-          </div>
-
-          <div className="pt-3 border-t border-neutral-100 text-xs text-neutral-500">
-            Click on any word below to inspect its phonemes and sound guidance.
-          </div>
-        </div>
-      </div>
-
-      {/* Word-by-Word Analysis */}
-      <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
-            Word-by-Word Breakdown
-          </h3>
-          <div className="flex items-center gap-3 text-[11px] text-neutral-500">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" /> Correct
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-amber-500" /> Partial
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-rose-500" /> Incorrect
-            </span>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          {sentence.words.map((w) => {
-            const isSelected = w.id === selectedWord.id;
-            let badgeColor =
-              w.status === 'correct'
-                ? 'bg-emerald-50 text-emerald-900 border-emerald-200 hover:bg-emerald-100/70'
-                : w.status === 'warning'
-                ? 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100/70'
-                : 'bg-rose-50 text-rose-900 border-rose-200 hover:bg-rose-100/70';
-
-            return (
               <button
-                key={w.id}
                 type="button"
-                onClick={() => setSelectedWord(w)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-medium border flex items-center gap-2 transition-all cursor-pointer ${badgeColor} ${
-                  isSelected ? 'ring-2 ring-indigo-600 ring-offset-1 font-semibold' : ''
-                }`}
+                onClick={() => handlePlayWord(sentence.text)}
+                className="p-3 bg-[#131f24] hover:bg-[#18272e] border border-[#37464f] text-[#ffc800] rounded-2xl transition-all shadow-sm shrink-0 active:scale-95 cursor-pointer"
+                title="Listen sentence"
               >
-                <span>{w.word}</span>
-                <span className="font-mono text-[10px] opacity-75 tabular-nums">
-                  {w.score}%
-                </span>
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePlayWord(w.cleanWord);
-                  }}
-                  className="p-0.5 rounded text-neutral-400 hover:text-neutral-700 transition-colors"
-                  title={`Pronounce "${w.cleanWord}"`}
-                >
-                  <Volume2 className="w-3 h-3" />
-                </span>
+                <Volume2 className="w-5 h-5 text-[#ffc800]" />
               </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Simplified Phoneme Details for Selected Word */}
-      <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-6">
-        <div className="flex items-center justify-between pb-3 mb-4 border-b border-neutral-100">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
-              Selected Word:
-            </span>
-            <span className="text-xl font-bold text-neutral-900">
-              {selectedWord.word}
-            </span>
-            <span className="font-mono text-xs text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded font-medium border border-indigo-100">
-              {selectedWord.ipa}
-            </span>
+            </div>
           </div>
 
+          {/* 2. Overall Score Box (Simple - Anchored to Top) */}
+          <div className="bg-[#202f36] rounded-3xl border-2 border-[#2b3a42] p-6 shadow-md flex flex-col justify-start">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-[#afbbcf]">
+                  Overall Score
+                </span>
+                <span className={`text-xs font-bold px-2.5 py-0.5 rounded-lg border ${rating.color}`}>
+                  {rating.label}
+                </span>
+              </div>
+
+              <div className="flex items-baseline gap-2 my-2">
+                <span className="text-5xl sm:text-6xl font-black text-[#ffc800] tabular-nums">
+                  {sentence.overallScore}
+                </span>
+                <span className="text-lg font-bold text-[#afbbcf]">/ 100</span>
+              </div>
+
+              {/* Excellent / Need Improvement Summary */}
+              <div className="flex items-center gap-3 my-3 text-xs font-bold">
+                <span className="px-3 py-1 rounded-xl bg-[#58cc02]/20 text-[#58cc02] border border-[#58cc02]/40">
+                  {sentence.correctCount} Excellent
+                </span>
+                <span className="px-3 py-1 rounded-xl bg-[#ff4b4b]/20 text-[#ff4b4b] border border-[#ff4b4b]/40">
+                  {sentence.incorrectCount} Need Improvement
+                </span>
+              </div>
+            </div>
+
+            {/* FEEDBACK (Tetap di atas, tidak justify ke bawah) */}
+            <div className="mt-4 pt-4 border-t border-[#2b3a42]">
+              <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-[#ffc800] mb-1">
+                <Sparkles className="w-3.5 h-3.5 text-[#ffc800]" />
+                <span>Feedback</span>
+              </div>
+              <p className="text-xs sm:text-sm text-white/95 leading-relaxed font-medium">
+                {sentence.aiSummary}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* KOLOM KANAN: Word Breakdown + Phonemes + Tombol Practice Again di Paling Bawah */}
+        <div className="lg:col-span-7 flex flex-col justify-between gap-4">
+          {/* 1. Word-by-Word Breakdown (Tanpa percentage score pada kata) */}
+          <div className="bg-[#202f36] rounded-3xl border-2 border-[#2b3a42] p-5 sm:p-6 shadow-md">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#afbbcf]">
+                Word Breakdown
+              </h3>
+              {/* Legend: Excellent, Good, Need Improvement */}
+              <div className="flex items-center gap-2.5 text-[11px] font-semibold text-[#afbbcf]">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-[#58cc02]" /> Excellent
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-[#ff9600]" /> Good
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-[#ff4b4b]" /> Need Improvement
+                </span>
+              </div>
+            </div>
+
+            {/* Word Chips tanpa percentage */}
+            <div className="flex flex-wrap items-center gap-2">
+              {sentence.words.map((w) => {
+                const isSelected = w.id === selectedWord.id;
+                let badgeStyle =
+                  w.status === 'correct'
+                    ? 'bg-[#58cc02]/20 text-[#58cc02] border-[#58cc02]/40 hover:bg-[#58cc02]/30'
+                    : w.status === 'warning'
+                    ? 'bg-[#ff9600]/20 text-[#ff9600] border-[#ff9600]/40 hover:bg-[#ff9600]/30'
+                    : 'bg-[#ff4b4b]/20 text-[#ff4b4b] border-[#ff4b4b]/40 hover:bg-[#ff4b4b]/30';
+
+                return (
+                  <button
+                    key={w.id}
+                    type="button"
+                    onClick={() => setSelectedWord(w)}
+                    className={`px-4 py-2 rounded-2xl text-sm font-bold border-2 flex items-center gap-2 transition-all cursor-pointer ${badgeStyle} ${
+                      isSelected ? 'ring-2 ring-[#ffc800] ring-offset-2 ring-offset-[#202f36] scale-105' : ''
+                    }`}
+                  >
+                    <span>{w.word}</span>
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlayWord(w.cleanWord);
+                      }}
+                      className="p-0.5 rounded text-white/70 hover:text-white transition-colors"
+                      title={`Pronounce "${w.cleanWord}"`}
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 2. Phonemes Details: Cukup berupa TIPS, tanpa score, tanpa speaker suara */}
+          <div className="bg-[#202f36] rounded-3xl border-2 border-[#2b3a42] p-5 sm:p-6 shadow-md flex-1 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-[#2b3a42]">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xs font-extrabold text-[#afbbcf] uppercase tracking-wider">
+                    Selected Word:
+                  </span>
+                  <span className="text-xl sm:text-2xl font-black text-white">
+                    {selectedWord.word}
+                  </span>
+                  <span className="font-mono text-xs text-[#ffc800] bg-[#ffc800]/15 px-2 py-0.5 rounded-lg font-bold border border-[#ffc800]/30">
+                    {selectedWord.ipa}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handlePlayWord(selectedWord.cleanWord)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#131f24] hover:bg-[#18272e] border border-[#37464f] text-[#ffc800] rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                >
+                  <Volume2 className="w-3.5 h-3.5 text-[#ffc800]" />
+                  <span>Listen</span>
+                </button>
+              </div>
+
+              {/* Phonemes Grid (Hanya Simbol, Tips, dan Placement - Tanpa score & tanpa speaker) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {selectedWord.phonemes.map((phoneme, idx) => {
+                  return (
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-2xl border-2 border-[#2b3a42] bg-[#131f24]/70 flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="mb-1.5">
+                          <span className="font-mono text-2xl font-black text-white block">
+                            {phoneme.symbol}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-[#afbbcf] mb-2 leading-snug">
+                          {phoneme.tip}
+                        </p>
+                      </div>
+
+                      <div className="text-[11px] text-[#afbbcf] pt-1.5 border-t border-[#2b3a42]">
+                        <span className="font-bold text-white">Placement: </span>
+                        {phoneme.mouthGuide.tongue}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Tombol Practice Again Paling Bawah */}
           <button
             type="button"
-            onClick={() => handlePlayWord(selectedWord.cleanWord)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-medium transition-colors"
+            onClick={onPracticeAgain}
+            className="w-full py-4 px-6 bg-[#ffc800] hover:bg-[#e5b400] text-[#131f24] text-base font-black uppercase tracking-wider rounded-2xl border-b-6 border-[#cc9f00] active:translate-y-1 active:border-b-2 transition-all shadow-xl flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Volume2 className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Listen &quot;{selectedWord.cleanWord}&quot;</span>
+            <RotateCcw className="w-5 h-5" />
+            <span>Practice Again</span>
           </button>
         </div>
-
-        {/* Phonemes Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {selectedWord.phonemes.map((phoneme, idx) => {
-            const isCorrect = phoneme.status === 'correct';
-            const isWarning = phoneme.status === 'warning';
-
-            return (
-              <div
-                key={idx}
-                className="p-4 rounded-xl border border-neutral-200 bg-neutral-50/50 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xl font-bold text-neutral-900">
-                        {phoneme.symbol}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handlePlayPhoneme(
-                            phoneme.symbol,
-                            phoneme.mouthGuide.vocalCords.includes('Voiced')
-                          )
-                        }
-                        className="p-1 rounded bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200"
-                        title="Hear phoneme sound"
-                      >
-                        <Volume2 className="w-3 h-3 text-indigo-600" />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-semibold tabular-nums">
-                        {phoneme.score}%
-                      </span>
-                      {isCorrect ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          <CheckCircle2 className="w-3 h-3" /> Correct
-                        </span>
-                      ) : isWarning ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                          <AlertCircle className="w-3 h-3" /> Partial
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                          <XCircle className="w-3 h-3" /> Incorrect
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-neutral-600 mb-2 leading-relaxed">
-                    {phoneme.tip}
-                  </p>
-                </div>
-
-                <div className="text-[11px] text-neutral-500 pt-2 border-t border-neutral-200/80">
-                  <span className="font-semibold text-neutral-700">Articulatory placement: </span>
-                  {phoneme.mouthGuide.tongue} · {phoneme.mouthGuide.vocalCords}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Bottom Actions: Practice Again & Back */}
-      <div className="flex items-center justify-between pt-4">
-        <button
-          type="button"
-          onClick={onBackToHome}
-          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold text-neutral-700 hover:text-neutral-900 bg-white border border-neutral-200 rounded-xl transition-colors cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Home</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={onPracticeAgain}
-          className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold rounded-xl transition-colors shadow-xs cursor-pointer"
-        >
-          <RotateCcw className="w-4 h-4" />
-          <span>Practice Again</span>
-        </button>
       </div>
     </div>
   );

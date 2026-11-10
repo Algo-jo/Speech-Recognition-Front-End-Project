@@ -4,7 +4,7 @@ export const PRACTICE_SENTENCES: PracticeSentence[] = [
   {
     id: 'weather-today',
     title: 'The weather is beautiful today',
-    text: 'The weather is beautiful today.',
+    text: 'The weather is beautiful today',
     ipa: '/ðə ˈwɛðər ɪz ˈbjuːtɪfʊl təˈdeɪ/',
     category: 'Daily',
     difficulty: 'Beginner',

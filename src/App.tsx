@@ -240,17 +240,13 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleBackToHome = () => {
-    setCurrentView('home');
-  };
-
   const handlePracticeAgain = () => {
     handleRetry();
     setCurrentView('home');
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-neutral-900">
+    <div className="min-h-screen bg-[#131f24] flex flex-col font-sans text-white">
       {/* Navbar with Logo and App Name flushed left */}
       <Header />
 
@@ -271,19 +267,18 @@ export default function App() {
         ) : (
           <ResultSection
             sentence={currentSentence}
-            onBackToHome={handleBackToHome}
             onPracticeAgain={handlePracticeAgain}
           />
         )}
       </main>
 
-      {/* Subtle Footer */}
-      <footer className="py-5 border-t border-neutral-200/80 bg-white/60 text-xs text-neutral-500 text-center">
+      {/* Subtle Duolingo Dark Footer */}
+      <footer className="py-5 border-t border-[#202f36] bg-[#131f24] text-xs text-[#afbbcf] text-center">
         <div className="w-full px-6 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="font-semibold text-neutral-700">
-            PronounceAI
+          <div className="font-extrabold text-white tracking-wide">
+            Pronounce<span className="text-[#ffc800]">AI</span>
           </div>
-          <div className="text-neutral-400 text-[11px]">
+          <div className="text-[#afbbcf] text-[11px]">
             Single-page pronunciation learning application
           </div>
         </div>
