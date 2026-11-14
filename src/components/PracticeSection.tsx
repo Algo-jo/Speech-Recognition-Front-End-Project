@@ -42,9 +42,9 @@ export const PracticeSection: React.FC<PracticeSectionProps> = ({
     transcript.trim().length > 0;
 
   return (
-    <div className="max-w-5xl w-full mx-auto py-5 sm:py-8 flex flex-col items-center gap-6 sm:gap-8">
+    <div className="w-full py-5 sm:py-8 flex flex-col items-center gap-6 sm:gap-8">
       {/* 1. Target Sentence (Tengah Atas - Tanpa Box, Tanpa Label, Tanpa Tanda Petik, Ukuran Besar) */}
-      <div className="w-full text-center flex items-center justify-center gap-3 sm:gap-4 px-4">
+      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 text-center flex items-center justify-center gap-3 sm:gap-4">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
           {sentence.text}
         </h1>
@@ -61,7 +61,7 @@ export const PracticeSection: React.FC<PracticeSectionProps> = ({
         </button>
       </div>
 
-      {/* 2. Tombol Mikrofon di Tengah dengan Gelombang Suara Terlentang di Kiri dan Kanan */}
+      {/* 2. Tombol Mikrofon di Tengah dengan Gelombang Suara Mentok Kiri ke Kanan */}
       <div className="w-full">
         <RecordingPanel
           recordingState={recordingState}
@@ -74,7 +74,7 @@ export const PracticeSection: React.FC<PracticeSectionProps> = ({
       </div>
 
       {/* 3. Live Speech Transcript (Langsung di Bawah Fitur Mic Tanpa Box) */}
-      <div className="w-full">
+      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6">
         <LiveTranscript
           transcript={transcript}
           recordingState={recordingState}
@@ -82,7 +82,7 @@ export const PracticeSection: React.FC<PracticeSectionProps> = ({
       </div>
 
       {/* 4. Tombol Analyze Pronunciation (Diperpanjang agar teks tidak bertumpuk) */}
-      <div className="w-full flex justify-center pt-2">
+      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 flex justify-center pt-2">
         <button
           type="button"
           onClick={onAnalyze}

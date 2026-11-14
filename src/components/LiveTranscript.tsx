@@ -30,10 +30,11 @@ export const LiveTranscript: React.FC<LiveTranscriptProps> = ({
               isRecording ? 'text-white/95' : 'text-white'
             }`}
           >
-            {transcript}
+            &ldquo;{transcript}
             {isRecording && (
               <span className="inline-block w-2 h-5 ml-1.5 bg-[#ffc800] animate-pulse align-middle" />
             )}
+            &rdquo;
           </p>
         ) : (
           <p className="text-base sm:text-lg text-[#afbbcf]/80 italic">

@@ -126,8 +126,16 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = ({
     };
 
     handleResize();
+
+    const observer = new ResizeObserver(handleResize);
+    if (canvasLeftRef.current) observer.observe(canvasLeftRef.current);
+    if (canvasRightRef.current) observer.observe(canvasRightRef.current);
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   // Dual Canvas animation render loop
@@ -178,22 +186,22 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = ({
         ctx.clearRect(0, 0, width, height);
 
         if (isRecording && hasVoiceInput) {
-          // Dynamic sound wave moving when voice input is active
+          // Dynamic sound wave moving from edge to edge when voice input is active
           ctx.strokeStyle = '#ffc800';
           ctx.lineWidth = 3.5 * dpr;
           ctx.lineCap = 'round';
           ctx.beginPath();
 
-          for (let x = 0; x < width; x += 2) {
+          for (let x = 0; x <= width; x += 2) {
             const normalizedX = x / width;
-            // Envelope: tapers towards edges and microphone
-            const envelope = isLeft
-              ? Math.sin(normalizedX * Math.PI * 0.85 + 0.15)
-              : Math.sin((1 - normalizedX) * Math.PI * 0.85 + 0.15);
+            // Taper smoothly near the microphone side while staying active to the outer edge
+            const distFromMic = isLeft ? 1 - normalizedX : normalizedX;
+            const micTaper = Math.min(1, distFromMic * 4);
+            const envelope = 0.2 + 0.8 * micTaper;
 
             const wave =
-              Math.sin(phase + (isLeft ? -x : x) * 0.05) * 0.6 +
-              Math.cos(phase * 1.3 + x * 0.03) * 0.4;
+              Math.sin(phase + (isLeft ? -x : x) * 0.035) * 0.6 +
+              Math.cos(phase * 1.3 + x * 0.02) * 0.4;
             const y = centerY + wave * (height * 0.38 * volume) * envelope;
 
             if (x === 0) {
@@ -204,7 +212,7 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = ({
           }
           ctx.stroke();
         } else {
-          // DIEM GARIS LURUS jika tidak ada suara input
+          // DIEM GARIS LURUS mentok kiri ke kanan jika tidak ada suara input
           ctx.strokeStyle = isRecording ? '#37464f' : '#2b3a42';
           ctx.lineWidth = 3 * dpr;
           ctx.beginPath();

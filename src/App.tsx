@@ -251,7 +251,7 @@ export default function App() {
       <Header />
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full px-4 sm:px-6">
+      <main className="flex-1 w-full">
         {currentView === 'home' ? (
           <PracticeSection
             sentence={currentSentence}
@@ -271,18 +271,6 @@ export default function App() {
           />
         )}
       </main>
-
-      {/* Subtle Duolingo Dark Footer */}
-      <footer className="py-5 border-t border-[#202f36] bg-[#131f24] text-xs text-[#afbbcf] text-center">
-        <div className="w-full px-6 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="font-extrabold text-white tracking-wide">
-            Pronounce<span className="text-[#ffc800]">AI</span>
-          </div>
-          <div className="text-[#afbbcf] text-[11px]">
-            Single-page pronunciation learning application
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
