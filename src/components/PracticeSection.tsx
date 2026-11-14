@@ -36,15 +36,13 @@ export const PracticeSection: React.FC<PracticeSectionProps> = ({
     setIsPlayingModel(false);
   };
 
-  const isReadyToAnalyze =
-    recordingState === 'recorded' ||
-    (recordingState === 'recording' && recordedDuration >= 1) ||
-    transcript.trim().length > 0;
+  // Analyze Pronunciation button hanya bekerja / bisa ditekan ketika kita sudah menekan tombol Stop Recording
+  const isReadyToAnalyze = recordingState === 'recorded';
 
   return (
     <div className="w-full py-5 sm:py-8 flex flex-col items-center gap-6 sm:gap-8">
       {/* 1. Target Sentence (Tengah Atas - Tanpa Box, Tanpa Label, Tanpa Tanda Petik, Ukuran Besar) */}
-      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 text-center flex items-center justify-center gap-3 sm:gap-4">
+      <div className="max-w-4xl w-full text-center flex items-center justify-center gap-3 sm:gap-4 px-4">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
           {sentence.text}
         </h1>
@@ -61,7 +59,7 @@ export const PracticeSection: React.FC<PracticeSectionProps> = ({
         </button>
       </div>
 
-      {/* 2. Tombol Mikrofon di Tengah dengan Gelombang Suara Mentok Kiri ke Kanan */}
+      {/* 2. Tombol Mikrofon di Tengah dengan Gelombang Suara Sejajar Logo di Kiri dan Mirror di Kanan */}
       <div className="w-full">
         <RecordingPanel
           recordingState={recordingState}
@@ -74,7 +72,7 @@ export const PracticeSection: React.FC<PracticeSectionProps> = ({
       </div>
 
       {/* 3. Live Speech Transcript (Langsung di Bawah Fitur Mic Tanpa Box) */}
-      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6">
+      <div className="max-w-4xl w-full">
         <LiveTranscript
           transcript={transcript}
           recordingState={recordingState}
@@ -82,13 +80,13 @@ export const PracticeSection: React.FC<PracticeSectionProps> = ({
       </div>
 
       {/* 4. Tombol Analyze Pronunciation (Diperpanjang agar teks tidak bertumpuk) */}
-      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 flex justify-center pt-2">
+      <div className="w-full flex justify-center pt-2">
         <button
           type="button"
           onClick={onAnalyze}
-          disabled={!isReadyToAnalyze || recordingState === 'analyzing'}
+          disabled={!isReadyToAnalyze}
           className={`min-w-[280px] sm:min-w-[340px] px-8 sm:px-10 py-4 sm:py-4.5 rounded-2xl text-sm sm:text-base font-black uppercase tracking-wider flex items-center justify-center gap-3 text-center transition-all shadow-2xl whitespace-nowrap ${
-            isReadyToAnalyze && recordingState !== 'analyzing'
+            isReadyToAnalyze
               ? 'bg-[#ffc800] hover:bg-[#e5b400] text-[#131f24] border-b-6 border-[#cc9f00] active:translate-y-1.5 active:border-b-2 cursor-pointer'
               : 'bg-[#2b3a42] text-[#6f828e] border-b-4 border-[#1f2b31] cursor-not-allowed opacity-60'
           }`}

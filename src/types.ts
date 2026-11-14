@@ -41,8 +41,8 @@ export interface PracticeSentence {
   title: string;
   text: string;
   ipa: string;
-  category: 'Daily' | 'Business' | 'Tricky Sounds' | 'Tongue Twister';
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  category: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard' | 'Beginner' | 'Intermediate' | 'Advanced';
   targetFocus: string;
   words: WordAnalysis[];
   overallScore: number;

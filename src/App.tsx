@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
+import { SentenceOptionPage } from './components/SentenceOptionPage';
 import { PracticeSection } from './components/PracticeSection';
 import { ResultSection } from './components/ResultSection';
 import { PRACTICE_SENTENCES } from './data/sentences';
@@ -9,7 +10,7 @@ import { assessPronunciationApi } from './services/api';
 export default function App() {
   const [sentences, setSentences] = useState<PracticeSentence[]>(PRACTICE_SENTENCES);
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
-  const [currentView, setCurrentView] = useState<'home' | 'results'>('home');
+  const [currentView, setCurrentView] = useState<'sentences' | 'practice' | 'results'>('sentences');
   const [recordingState, setRecordingState] = useState<RecordingState>('idle');
   const [transcript, setTranscript] = useState<string>('');
   const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
@@ -240,19 +241,43 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleSelectSentence = (sentence: PracticeSentence) => {
+    const idx = sentences.findIndex((s) => s.id === sentence.id);
+    if (idx !== -1) {
+      setCurrentSentenceIndex(idx);
+    }
+    handleRetry();
+    setCurrentView('practice');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handlePracticeAgain = () => {
     handleRetry();
-    setCurrentView('home');
+    setCurrentView('practice');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateHome = () => {
+    handleRetry();
+    setCurrentView('sentences');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-[#131f24] flex flex-col font-sans text-white">
-      {/* Navbar with Logo and App Name flushed left */}
-      <Header />
+    <div className="min-h-screen bg-[#131f24] flex flex-col font-sans text-white overflow-x-hidden">
+      {/* Navbar with Logo and App Name flushed left - Clickable to return to Sentence Options Home */}
+      <Header onNavigateHome={handleNavigateHome} />
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full">
-        {currentView === 'home' ? (
+      <main className="flex-1 w-full px-6 sm:px-8">
+        {currentView === 'sentences' && (
+          <SentenceOptionPage
+            sentences={sentences}
+            onSelectSentence={handleSelectSentence}
+          />
+        )}
+
+        {currentView === 'practice' && (
           <PracticeSection
             sentence={currentSentence}
             recordingState={recordingState}
@@ -264,10 +289,13 @@ export default function App() {
             audioBlobUrl={audioBlobUrl}
             recordedDuration={recordedDuration}
           />
-        ) : (
+        )}
+
+        {currentView === 'results' && (
           <ResultSection
             sentence={currentSentence}
             onPracticeAgain={handlePracticeAgain}
+            onNavigateHome={handleNavigateHome}
           />
         )}
       </main>

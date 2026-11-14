@@ -126,15 +126,20 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = ({
     };
 
     handleResize();
-
-    const observer = new ResizeObserver(handleResize);
-    if (canvasLeftRef.current) observer.observe(canvasLeftRef.current);
-    if (canvasRightRef.current) observer.observe(canvasRightRef.current);
     window.addEventListener('resize', handleResize);
 
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(() => {
+        handleResize();
+      });
+      if (canvasLeftRef.current) observer.observe(canvasLeftRef.current);
+      if (canvasRightRef.current) observer.observe(canvasRightRef.current);
+    }
+
     return () => {
-      observer.disconnect();
       window.removeEventListener('resize', handleResize);
+      if (observer) observer.disconnect();
     };
   }, []);
 
@@ -186,22 +191,22 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = ({
         ctx.clearRect(0, 0, width, height);
 
         if (isRecording && hasVoiceInput) {
-          // Dynamic sound wave moving from edge to edge when voice input is active
+          // Dynamic sound wave moving when voice input is active - mentok ke kiri dan kanan
           ctx.strokeStyle = '#ffc800';
           ctx.lineWidth = 3.5 * dpr;
           ctx.lineCap = 'round';
           ctx.beginPath();
 
           for (let x = 0; x <= width; x += 2) {
-            const normalizedX = x / width;
-            // Taper smoothly near the microphone side while staying active to the outer edge
-            const distFromMic = isLeft ? 1 - normalizedX : normalizedX;
-            const micTaper = Math.min(1, distFromMic * 4);
-            const envelope = 0.2 + 0.8 * micTaper;
+            const normalizedX = width > 0 ? x / width : 0;
+            // Envelope: spreads wave dynamically from the far screen edge to the center mic
+            const envelope = isLeft
+              ? (0.35 + 0.65 * Math.sin(normalizedX * Math.PI * 0.8 + 0.2))
+              : (0.35 + 0.65 * Math.sin((1 - normalizedX) * Math.PI * 0.8 + 0.2));
 
             const wave =
-              Math.sin(phase + (isLeft ? -x : x) * 0.035) * 0.6 +
-              Math.cos(phase * 1.3 + x * 0.02) * 0.4;
+              Math.sin(phase + (isLeft ? -x : x) * 0.05) * 0.6 +
+              Math.cos(phase * 1.3 + x * 0.03) * 0.4;
             const y = centerY + wave * (height * 0.38 * volume) * envelope;
 
             if (x === 0) {
@@ -212,7 +217,7 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = ({
           }
           ctx.stroke();
         } else {
-          // DIEM GARIS LURUS mentok kiri ke kanan jika tidak ada suara input
+          // DIEM GARIS LURUS jika tidak ada suara input - lurus mentok ke ujung layar
           ctx.strokeStyle = isRecording ? '#37464f' : '#2b3a42';
           ctx.lineWidth = 3 * dpr;
           ctx.beginPath();
@@ -273,29 +278,24 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = ({
     } else if (recordingState === 'recording') {
       onStopRecording();
     } else if (hasRecorded) {
-      onRetry();
+      // Langsung mulai recording saat Click to Try Again ditekan (tanpa reset ke Click to Start Recording)
+      onStartRecording();
     }
   };
 
-  const displayTimer = isRecording
-    ? formatTimer(seconds)
-    : hasRecorded && recordedDuration > 0
-    ? formatTimer(recordedDuration)
-    : null;
-
   return (
     <div className="w-full flex flex-col items-center justify-center relative py-2 sm:py-4">
-      {/* Horizontal Row: Waveform Kiri (dari ujung kiri) --- Tombol Mikrofon Gede (Tengah) --- Waveform Kanan (ke ujung kanan) */}
-      <div className="w-full flex items-center justify-between gap-4 sm:gap-8">
-        {/* Waveform Kiri Canvas: terlentang dari kiri */}
-        <div className="flex-1 h-24 flex items-center justify-center overflow-hidden">
+      {/* Horizontal Row: Waveform Kiri (sejajar LOGO di atas) --- Tombol Mikrofon Gede (JUSTIFY TENGAH) --- Waveform Kanan (mirror yang kiri) */}
+      <div className="w-full flex items-center justify-center gap-3 sm:gap-5 overflow-hidden">
+        {/* Waveform Kiri Canvas: terlentang dari sejajar LOGO di atas */}
+        <div className="flex-1 h-24 flex items-center overflow-hidden">
           <canvas
             ref={canvasLeftRef}
             className="w-full h-20 block"
           />
         </div>
 
-        {/* Tombol Mikrofon Gede di Tengah (diperbesar sesuai instruksi) */}
+        {/* Tombol Mikrofon Gede di Tengah (JUSTIFY TENGAH) */}
         <div className="shrink-0 flex items-center justify-center">
           {recordingState === 'idle' && (
             <button
@@ -331,8 +331,8 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = ({
           )}
         </div>
 
-        {/* Waveform Kanan Canvas: terlentang ke kanan */}
-        <div className="flex-1 h-24 flex items-center justify-center overflow-hidden">
+        {/* Waveform Kanan Canvas: terlentang ke kanan mirror yang kiri */}
+        <div className="flex-1 h-24 flex items-center overflow-hidden">
           <canvas
             ref={canvasRightRef}
             className="w-full h-20 block"
@@ -340,8 +340,8 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = ({
         </div>
       </div>
 
-      {/* Teks di Bawah Tombol Mikrofon (Tidak tabrakan dengan gelombang suara) */}
-      <div className="mt-5 text-center flex flex-col items-center">
+      {/* Teks di Bawah Tombol Mikrofon (Jarak diperlebar, stopwatch dibuang) */}
+      <div className="mt-8 sm:mt-10 text-center flex flex-col items-center">
         <span className="text-base sm:text-xl font-extrabold text-white tracking-wide block">
           {recordingState === 'idle'
             ? 'Click to Start Recording'
@@ -349,13 +349,6 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = ({
             ? 'Click to Stop Recording'
             : 'Click to Try Again'}
         </span>
-
-        {/* Durasi / Timer (HANYA MUNCUL SAAT KLIK / RECORDING ATAU SUDAH TEREKAM) */}
-        {displayTimer && (
-          <div className="mt-2.5 font-mono text-xs sm:text-sm font-bold text-[#ffc800] bg-[#131f24] border-2 border-[#37464f] px-4 py-1 rounded-full inline-block tabular-nums shadow-inner">
-            {displayTimer}
-          </div>
-        )}
 
         {/* Replay Voice Button saat sudah terekam */}
         {hasRecorded && audioBlobUrl && (
